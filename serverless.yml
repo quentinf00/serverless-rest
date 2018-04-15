@@ -1,0 +1,66 @@
+service: sls-rest
+
+provider:
+  name: aws
+  runtime: python3.6
+  region: eu-central-1
+  stage: ${opt:stage, 'dev'}
+  environment:
+    BUCKET: ${self:custom.bucket_name}
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "s3:*"
+      Resource:
+          - "*"
+
+package:
+  exclude:
+    - venv/**
+    - node_modules/**
+functions:
+  user_get:
+    handler: user.get
+    events:
+      - http:
+          path: user/{id}
+          method: GET
+  user_post:
+    handler: user.post
+    events:
+      - http:
+          path: user
+          method: POST
+  user_delete:
+    handler: user.delete
+    events:
+      - http:
+          path: user/{id}
+          method: DELETE
+  user_put:
+    handler: user.put
+    events:
+      - http:
+          path: user/{id}
+          method: PUT
+  user_list:
+    handler: user.list
+    events:
+      - http:
+          path: user/list
+          method: GET
+
+resources:
+  Resources:
+    S3BucketState:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.bucket_name}
+
+custom:
+  pythonRequirements:
+    dockerizePip: True
+  bucket_name: sls-rest-4213
+
+plugins:
+  - serverless-python-requirements
