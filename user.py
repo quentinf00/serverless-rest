@@ -2,10 +2,10 @@ import json
 import boto3
 import os
 import uuid
-import datetime
 from schema import Schema
 from functools import wraps
 import sys
+import athena
 
 BUCKET = os.getenv('BUCKET', 'bucket')
 s3 = boto3.client('s3')
@@ -70,10 +70,7 @@ def delete(event, context):
 @handle_api_error
 def list(event, context):
     print(event)
-    return [
-        User.load(user_id)
-        for user_id in User.list_ids()
-    ]
+    return User.list()
 
 
 class User(object):
@@ -126,3 +123,11 @@ class User(object):
         ]
 
         return user_ids
+
+    @staticmethod
+    def list():
+        users = athena.get_results("""
+            SELECT * FROM mydb.users
+        """)
+
+        return users
