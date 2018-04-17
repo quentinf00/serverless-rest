@@ -56,13 +56,13 @@ functions:
           path: user/{id}
           method: PUT
   user_list:
-    handler: user.list
+    handler: user.all
     events:
       - http:
           path: user/list
           method: GET
-  init_athena_schema:
-    handler: athena.init_schema
+  user_init_athena_schema:
+    handler: user.init_schema
 
 resources:
   Resources:
