@@ -18,7 +18,7 @@ def handle_api_error(func):
         try:
             return {
                 'statusCode': 200,
-                'body': json.dumps(func(*args, **kwargs))
+                'body': json.dumps(func(*args, **kwargs)),
             }
         except Exception as e:
 
