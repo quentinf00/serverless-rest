@@ -7,8 +7,10 @@ provider:
   stage: ${opt:stage, 'dev'}
   timeout: 15
   environment:
-    BUCKET: ${self:custom.bucket_name}
-    ATHENA_BUCKET: ${self:custom.athena_result_bucket}
+    BUCKET:
+      Ref: S3BucketState
+    ATHENA_BUCKET:
+      Ref: S3AthenaResultBucket
   iamRoleStatements:
     - Effect: "Allow"
       Action:
@@ -31,6 +33,11 @@ package:
     - venv/**
     - node_modules/**
 functions:
+  app:
+    handler: wsgi.handler
+    events:
+      - http: ANY /
+      - http: 'ANY {proxy+}'
   user_get:
     handler: user.get
     events:
@@ -63,23 +70,23 @@ functions:
           method: GET
   user_init_athena_schema:
     handler: user.init_schema
+  book_init_athena_schema:
+    handler: app.init_schema
 
 resources:
   Resources:
     S3BucketState:
       Type: AWS::S3::Bucket
-      Properties:
-        BucketName: ${self:custom.bucket_name}
     S3AthenaResultBucket:
       Type: AWS::S3::Bucket
-      Properties:
-        BucketName: ${self:custom.athena_result_bucket}
 
 custom:
   pythonRequirements:
     dockerizePip: True
-  bucket_name: sls-rest-4213
-  athena_result_bucket: sls-rest-4213-athena-result
+  wsgi:
+    app: app.app
+    packRequirements: false
 
 plugins:
   - serverless-python-requirements
+  - serverless-wsgi
